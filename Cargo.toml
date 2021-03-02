@@ -1,0 +1,26 @@
+[package]
+name = "mdbook-rss"
+description = "mdBook preprocessor for generating an RSS feed from your chapters"
+repository = "https://gitlab.com/albalitz/mdbook-rss"
+homepage = "https://gitlab.com/albalitz/mdbook-rss"
+version = "0.1.0"
+authors = ["albalitz <opensource@albalitz.eu>"]
+edition = "2018"
+keywords = ["rss", "mdbook-preprocessor"]
+readme = "README.md"
+license-file = "LICENSE"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.38"
+clap = "2.33.3"
+getset = "0.1.1"
+globset = "0.4.6"
+markdown = "0.3.0"
+mdbook = "0.4.7"
+regex = "1.4.3"
+rss = "1.10.0"
+serde = "1.0.123"
+serde_json = "1.0.64"
+url = "2.2.1"
