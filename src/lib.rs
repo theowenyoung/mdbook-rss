@@ -15,6 +15,26 @@ mod feed;
 /// The file name relative to SUMMARY.md where the generated RSS feed is written
 const RSS_FILE_NAME: &str = "rss.xml";
 
+/// Configuration key to be used in the book.toml to configure a regex to use when extracting a
+/// chapter's publication date for the corresponding RSS feed item
+const CONFIG_FIELD_DATE_PATTERN: &str = "date-pattern";
+
+/// Configuration key to be used in the book.toml to configure a glob used for deciding which
+/// chapters to include in the RSS feed
+const CONFIG_FIELD_FILES_GLOB: &str = "files-glob";
+
+/// Configuration key to be used in the book.toml to configure the base URL used to construct links
+/// back to the mdbook from the generated RSS feed.
+///
+/// This will be combined with the path to the chapter, relative from the book's SUMMARY.md.
+///
+/// Basically this is a combination of the domain where the mdbook is hosted and the book's
+/// [`site-url`](https://rust-lang.github.io/mdBook/format/config.html#html-renderer-options)
+/// option.
+///
+/// Note that due to implementation detail of [`url::Url::join`] this should end with a '/'.
+const CONFIG_FIELD_URL_BASE: &str = "url-base";
+
 /// This fallback pattern is used, when there's no date pattern configured in this preprocessor's
 /// section in the book.toml.
 const CONFIG_DATE_PATTERN_DEFAULT: &str = r"\d{4}-\d{2}-\d{2}";
@@ -91,7 +111,7 @@ impl RssConfig {
             None => anyhow::bail!("Can't find preprocessor config section. Please check the documentation and update your book.toml"),
         };
 
-        let files_glob = match preprocessor_config.get("files-glob") {
+        let files_glob = match preprocessor_config.get(CONFIG_FIELD_FILES_GLOB) {
             Some(files_glob) => match files_glob.as_str() {
                 Some(files_glob) => GlobBuilder::new(files_glob)
                     .literal_separator(true)
@@ -104,7 +124,7 @@ impl RssConfig {
             ),
         };
 
-        let date_pattern = match preprocessor_config.get("date-pattern") {
+        let date_pattern = match preprocessor_config.get(CONFIG_FIELD_DATE_PATTERN) {
             Some(date_pattern) => match date_pattern.as_str() {
                 Some(date_pattern) => date_pattern,
                 None => anyhow::bail!("Expected date-pattern to be a string!"),
@@ -116,7 +136,7 @@ impl RssConfig {
             Err(e) => anyhow::bail!(e),
         };
 
-        let url_base = match preprocessor_config.get("url-base") {
+        let url_base = match preprocessor_config.get(CONFIG_FIELD_URL_BASE) {
             Some(url_base) => match url_base.as_str() {
                 Some(url_base) => match Url::parse(url_base) {
                     Ok(url_base) => url_base,
