@@ -6,7 +6,6 @@ use globset::{GlobBuilder, GlobMatcher};
 use mdbook::book::Book;
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use regex::Regex;
 use rss::Item;
 use url::Url;
 
@@ -14,10 +13,6 @@ mod feed;
 
 /// The file name relative to SUMMARY.md where the generated RSS feed is written
 const RSS_FILE_NAME: &str = "rss.xml";
-
-/// Configuration key to be used in the book.toml to configure a regex to use when extracting a
-/// chapter's publication date for the corresponding RSS feed item
-const CONFIG_FIELD_DATE_PATTERN: &str = "date-pattern";
 
 /// Configuration key to be used in the book.toml to configure a glob used for deciding which
 /// chapters to include in the RSS feed
@@ -35,10 +30,6 @@ const CONFIG_FIELD_FILES_GLOB: &str = "files-glob";
 /// Note that due to implementation detail of [`url::Url::join`] this should end with a '/'.
 const CONFIG_FIELD_URL_BASE: &str = "url-base";
 
-/// This fallback pattern is used, when there's no date pattern configured in this preprocessor's
-/// section in the book.toml.
-const CONFIG_DATE_PATTERN_DEFAULT: &str = r"\d{4}-\d{2}-\d{2}";
-
 pub struct RssProcessor;
 
 impl RssProcessor {
@@ -53,14 +44,15 @@ impl Preprocessor for RssProcessor {
         "rss"
     }
 
-    fn run(&self, ctx: &PreprocessorContext, book: Book) -> Result<Book, Error> {
+    fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
         let config = RssConfig::from_book_config(&ctx.config, self.name())?;
 
-        let rss_items: Vec<Item> = book
-            .iter()
-            .filter_map(|book_item| feed::RssItem::from_book_item(&book_item, &config).ok())
-            .map(|rss_item| rss_item.item())
-            .collect();
+        let mut rss_items: Vec<Item> = Vec::new();
+        book.for_each_mut(|book_item| match feed::item(book_item, &config) {
+            Ok(rss_item) => rss_items.push(rss_item),
+            Err(e) => eprintln!("{}", e),
+        });
+
         eprintln!("Collected RSS items: {}", rss_items.len());
 
         let rss_channel = feed::rss_channel(config, rss_items)?;
@@ -83,7 +75,6 @@ impl Preprocessor for RssProcessor {
 struct RssConfig {
     author: String,
     files_glob: GlobMatcher,
-    date_pattern: Regex,
     title: String,
     description: String,
     url_base: Url,
@@ -124,18 +115,6 @@ impl RssConfig {
             ),
         };
 
-        let date_pattern = match preprocessor_config.get(CONFIG_FIELD_DATE_PATTERN) {
-            Some(date_pattern) => match date_pattern.as_str() {
-                Some(date_pattern) => date_pattern,
-                None => anyhow::bail!("Expected date-pattern to be a string!"),
-            },
-            None => CONFIG_DATE_PATTERN_DEFAULT,
-        };
-        let date_pattern = match Regex::new(date_pattern) {
-            Ok(regex) => regex,
-            Err(e) => anyhow::bail!(e),
-        };
-
         let url_base = match preprocessor_config.get(CONFIG_FIELD_URL_BASE) {
             Some(url_base) => match url_base.as_str() {
                 Some(url_base) => match Url::parse(url_base) {
@@ -152,7 +131,6 @@ impl RssConfig {
         Ok(RssConfig {
             author,
             files_glob,
-            date_pattern,
             title,
             description,
             url_base,
