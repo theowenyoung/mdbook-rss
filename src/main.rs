@@ -2,11 +2,14 @@ use std::io;
 use std::process;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use log::{error, warn};
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
 
 use mdbook_rss::RssProcessor;
 
 fn main() {
+    env_logger::init();
+
     let args = App::new("nop-preprocessor")
         .about("A mdbook preprocessor which does precisely nothing")
         .subcommand(
@@ -21,7 +24,7 @@ fn main() {
     if let Some(sub_args) = args.subcommand_matches("supports") {
         handle_supports(&preprocessor, sub_args);
     } else if let Err(e) = handle_preprocessing(&preprocessor) {
-        eprintln!("{}", e);
+        error!("{}", e);
         process::exit(1);
     }
 }
@@ -32,8 +35,8 @@ fn handle_preprocessing(pre: &dyn Preprocessor) -> Result<(), Box<dyn std::error
     if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
         // We should probably use the `semver` crate to check compatibility
         // here...
-        eprintln!(
-            "Warning: The {} plugin was built against version {} of mdbook, \
+        warn!(
+            "The {} plugin was built against version {} of mdbook, \
              but we're being called from version {}",
             pre.name(),
             mdbook::MDBOOK_VERSION,

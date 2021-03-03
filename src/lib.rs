@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use getset::Getters;
 use globset::{GlobBuilder, GlobMatcher};
+use log::{debug, info};
 use mdbook::book::Book;
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
@@ -50,15 +51,15 @@ impl Preprocessor for RssProcessor {
         let mut rss_items: Vec<Item> = Vec::new();
         book.for_each_mut(|book_item| match feed::item(book_item, &config) {
             Ok(rss_item) => rss_items.push(rss_item),
-            Err(e) => eprintln!("{}", e),
+            Err(e) => info!("{}", e),
         });
 
-        eprintln!("Collected RSS items: {}", rss_items.len());
+        debug!("Collected RSS items: {}", rss_items.len());
 
         let rss_channel = feed::rss_channel(config, rss_items)?;
 
         let rss_path: PathBuf = ctx.config.book.src.join(RSS_FILE_NAME);
-        eprintln!("Writing RSS feed to {:?} ...", rss_path);
+        info!("Writing RSS feed to {:?} ...", rss_path);
         fs::write(rss_path, rss_channel.to_string())?;
 
         Ok(book)
