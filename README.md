@@ -47,6 +47,7 @@ Currently only `pub_date` and `description` are supported with the description b
 
 
 ## Known Issues/Potential Improvements
+- There are now actual tests yet. The only testing I did was checking the resulting feed in a feed reader.
 - The RSS items' content is HTML rendered by this preprocessor using the [markdown crate](https://crates.io/crates/markdown); this means mdbook-specific features may be rendered incorrectly in the generated RSS feed.
 - Front matter is removed which makes it unavailable/incompatible with other preprocessors running after this which also use front matter.  
   Keep front matter and remove it with a separate preprocessor used for removing front matter?
