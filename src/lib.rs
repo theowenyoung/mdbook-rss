@@ -12,6 +12,9 @@ use url::Url;
 
 mod feed;
 
+/// This is what's expected to exist in the book.toml as `[preprocessor.<name>]`
+const PREPROCESSOR_NAME: &str = "rss";
+
 /// The file name relative to SUMMARY.md where the generated RSS feed is written
 const RSS_FILE_NAME: &str = "rss.xml";
 
@@ -40,9 +43,8 @@ impl RssProcessor {
 }
 
 impl Preprocessor for RssProcessor {
-    /// This is what's expected to exist in the book.toml as `[preprocessor.<name>]`
     fn name(&self) -> &str {
-        "rss"
+        PREPROCESSOR_NAME
     }
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
