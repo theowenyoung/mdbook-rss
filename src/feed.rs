@@ -1,3 +1,4 @@
+//! The functions in this module do the actual work for generating the RSS feed from the book.
 use std::path::PathBuf;
 
 use clap::{crate_name, crate_version};
@@ -20,6 +21,8 @@ struct FrontMatter {
 
 /// Construct an [`rss::Channel`] from an [`RssConfig`] and [`rss::Item`]s, taking information
 /// about the resulting RSS feed from the config.
+///
+/// The resulting Channel is the RSS feed.
 pub(super) fn rss_channel(
     mdbook_rss_config: RssConfig,
     rss_items: Vec<Item>,
