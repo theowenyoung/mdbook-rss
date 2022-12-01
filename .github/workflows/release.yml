@@ -16,9 +16,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            suffix: .exe
+          # - os: windows-latest
+          #   target: x86_64-pc-windows-msvc
+          #   suffix: .exe
           - os: macos-latest
             target: x86_64-apple-darwin
             suffix: '.zip'

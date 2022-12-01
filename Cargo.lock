@@ -1025,7 +1025,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-rss"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap 2.34.0",
