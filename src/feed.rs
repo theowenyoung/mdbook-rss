@@ -34,8 +34,7 @@ pub(super) fn rss_channel(
         .generator(format!("{} {}", crate_name!(), crate_version!()))
         .build()
     {
-        Ok(channel) => Ok(channel),
-        Err(e) => anyhow::bail!(e),
+        channel => Ok(channel),
     }
 }
 
@@ -99,18 +98,14 @@ pub(super) fn item(book_item: &mut BookItem, config: &RssConfig) -> Result<Item,
             };
             let chapter_content_html = markdown::to_html(&markdown_without_front_matter);
             let author = config.author().to_owned();
-            let rss_item = match ItemBuilder::default()
+            let rss_item = ItemBuilder::default()
                 .title(chapter_name)
                 .description(description)
                 .author(Some(author))
                 .pub_date(Some(pub_date))
-                .link(Some(chapter_link.into_string()))
+                .link(Some(chapter_link.to_string()))
                 .content(Some(chapter_content_html))
-                .build()
-            {
-                Ok(item) => item,
-                Err(e) => anyhow::bail!(e),
-            };
+                .build();
 
             Ok(rss_item)
         }
