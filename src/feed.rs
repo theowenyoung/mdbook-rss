@@ -15,7 +15,7 @@ use super::RssConfig;
 #[derive(Debug, Deserialize, Getters)]
 #[getset(get = "pub")]
 struct FrontMatter {
-    pub_date: String,
+    date: String,
     description: Option<String>,
 }
 
@@ -80,7 +80,7 @@ pub(super) fn item(book_item: &mut BookItem, config: &RssConfig) -> Result<Item,
             let front_matter: FrontMatter = front_matter.data.deserialize()?;
 
             let chapter_name = chapter.name.to_owned();
-            let pub_date: String = front_matter.pub_date().to_owned();
+            let pub_date: String = front_matter.date().to_owned();
             let description: Option<String> = front_matter
                 .description()
                 .as_ref()
